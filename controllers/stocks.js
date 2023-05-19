@@ -1,5 +1,7 @@
 import Stock from '../models/stock.js'
 
+// test
+
 export const getStocks = async (req, res) => {
   // const stocks = await Stock.find()
   // stocks.forEach(stock => {
