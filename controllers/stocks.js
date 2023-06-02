@@ -40,6 +40,11 @@ export const getStock = async (req, res) => {
       const newStockData = new Stock({
         ticker: stockData.ticker,
         name: stockData.name,
+        description: stockData.description,
+        exchange: stockData.exchange,
+        currency: stockData.currency,
+        sector: stockData.sector,
+        industry: stockData.industry,
         updatedAt: new Date().getTime(),
         FinancialStatements: stockData.FinancialStatements,
         Ratios: stockData.Ratios
@@ -54,6 +59,11 @@ export const getStock = async (req, res) => {
         console.log(stock[0])
         stock[0].ticker = ticker
         stock[0].name = stockData.name
+        stock[0].description = stockData.description
+        stock[0].exchange = stockData.exchange
+        stock[0].currency = stockData.currency
+        stock[0].sector = stockData.sector
+        stock[0].industry = stockData.industry
         stock[0].updatedAt = new Date().getTime()
         stock[0].FinancialStatements = stockData.FinancialStatements
         await stock[0].save()
@@ -76,6 +86,11 @@ const fetchStockData = async (ticker) => {
   const stockData = {
     ticker: ticker,
     name: '',
+    description: '',
+    exchange: '',
+    currency: '',
+    sector: '',
+    industry: '',
     FinancialStatements: {
       IncomeStatement: {},
       BalanceSheet: {},
@@ -101,12 +116,18 @@ const fetchStockData = async (ticker) => {
     .then(response => response.json())
     .then(res => {
       stockData.name = res.Name
+      stockData.description = res.Description
+      stockData.exchange = res.Exchange
+      stockData.currency = res.Currency
+      stockData.sector = res.Sector
+      stockData.industry = res.Industry
 
     })
 
   await fetch(`https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=${ticker.toUpperCase()}&apikey=GN7K9CBY3UKBXCFO`)
     .then(response => response.json())
     .then(res => {
+      console.log('130')
 
       stockData.FinancialStatements.IncomeStatement = res
       //console.log(stockData.FinancialStatements.IncomeStatement)
@@ -119,17 +140,24 @@ const fetchStockData = async (ticker) => {
         item.totalRevenue = Number(item.costofGoodsAndServicesSold) + Number(item.grossProfit)
       })
     })
+  console.log('143')
 
   await fetch(`https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${ticker.toUpperCase()}&apikey=GN7K9CBY3UKBXCFO`)
     .then(response => response.json())
     .then(res => {
+
       stockData.FinancialStatements.BalanceSheet = res
       delete stockData.FinancialStatements.BalanceSheet.symbol
+      console.log('152')
+
     })
+
 
   await fetch(`https://www.alphavantage.co/query?function=CASH_FLOW&symbol=${ticker.toUpperCase()}&apikey=GN7K9CBY3UKBXCFO`)
     .then(response => response.json())
     .then(res => {
+      console.log('160')
+
       stockData.FinancialStatements.CashflowStatement = res
       delete stockData.FinancialStatements.CashflowStatement.symbol
       stockData.FinancialStatements.CashflowStatement.annualReports.forEach(item => {
@@ -138,6 +166,7 @@ const fetchStockData = async (ticker) => {
       stockData.FinancialStatements.CashflowStatement.quarterlyReports.forEach(item => {
         item.freeCashflow = Number(item.operatingCashflow - item.capitalExpenditures).toString()
       })
+      console.log('170')
 
     })
 
@@ -174,6 +203,7 @@ const fetchStockData = async (ticker) => {
 
   };
 
+
   const Cashflow_TTM = {
     fiscalDateEnding: "TTM",
     reportedCurrency: "USD",
@@ -207,6 +237,8 @@ const fetchStockData = async (ticker) => {
     freeCashflow: 0
   };
 
+
+
   for (let i = 0; i < 4; i++) {
     Income_TTM.grossProfit += Number(Income_quarterlyReports[i].grossProfit);
     Income_TTM.totalRevenue += Number(Income_quarterlyReports[i].totalRevenue);
@@ -233,6 +265,8 @@ const fetchStockData = async (ticker) => {
     Income_TTM.ebitda += Number(Income_quarterlyReports[i].ebitda);
     Income_TTM.netIncome += Number(Income_quarterlyReports[i].netIncome);
   }
+
+
 
   for (let i = 0; i < 4; i++) {
     Cashflow_TTM.operatingCashflow += Number(Cashflow_quarterlyReports[i].operatingCashflow);
@@ -269,10 +303,9 @@ const fetchStockData = async (ticker) => {
   stockData.FinancialStatements.CashflowStatement.annualReports.unshift(Cashflow_TTM)
 
 
-
-
-  for (let i = 0; i < stockData.FinancialStatements.BalanceSheet.annualReports.length; i++) {
+  for (let i = 0; !(i < stockData.FinancialStatements.BalanceSheet.annualReports.length) && !(i < stockData.FinancialStatements.IncomeStatement.annualReports.length); i++) {
     // Find the corresponding fiscalDateEnding in the IncomeStatement object
+    console.log(i)
     const fiscalDateEnding = stockData.FinancialStatements.BalanceSheet.annualReports[i].fiscalDateEnding;
     const costofGoodsAndServicesSold = stockData.FinancialStatements.IncomeStatement.annualReports.find((item) => item.fiscalDateEnding === fiscalDateEnding).costofGoodsAndServicesSold;
     const grossProfit = stockData.FinancialStatements.IncomeStatement.annualReports.find((item) => item.fiscalDateEnding === fiscalDateEnding).grossProfit;
@@ -315,11 +348,13 @@ const fetchStockData = async (ticker) => {
       inventoryTurnover: inventoryTurnover,
     }
 
+
     stockData.Ratios.Profitability.annualReports.push(profitability);
     stockData.Ratios.FinancialStability.annualReports.push(financialStability);
   }
 
   return stockData
+
 }
 
 // const fetchStockData = async (ticker) => {

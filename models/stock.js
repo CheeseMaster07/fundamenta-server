@@ -2,6 +2,12 @@ import mongoose from 'mongoose'
 const stockSchema = new mongoose.Schema({
   ticker: String,
   name: String,
+  ticker: String,
+  description: String,
+  exchange: String,
+  currency: String,
+  sector: String,
+  industry: String,
   updatedAt: Date,
   FinancialStatements: {
     IncomeStatement: {
