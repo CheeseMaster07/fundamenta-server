@@ -8,7 +8,12 @@ const stockSchema = new mongoose.Schema({
   currency: String,
   sector: String,
   industry: String,
+  latestSharesOutstanding: Number,
   updatedAt: Date,
+  Pricing: {
+    lastPrice: Number,
+    lastMarketCap: Number
+  },
   FinancialStatements: {
     IncomeStatement: {
       annualReports: [mongoose.Schema.Types.Mixed],
