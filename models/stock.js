@@ -10,6 +10,7 @@ const stockSchema = new mongoose.Schema({
   industry: String,
   latestSharesOutstanding: Number,
   updatedAt: Date,
+  likes: { type: [String], default: [] },
   Pricing: {
     lastPrice: Number,
     lastMarketCap: Number
