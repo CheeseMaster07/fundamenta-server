@@ -9,6 +9,12 @@ const stockSchema = new mongoose.Schema({
   sector: String,
   industry: String,
   latestSharesOutstanding: Number,
+  beta: Number,
+  pe: Number,
+  forwardPe: Number,
+  pb: Number,
+  dividendYield: Number,
+  pre5yrsCAGR: Number,
   updatedAt: Date,
   likes: { type: [String], default: [] },
   Pricing: {
